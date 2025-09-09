@@ -1,0 +1,17 @@
+# DJ Lite - Ultra-prosty odtwarzacz DJ
+# Python 3.10+ wymagany
+
+# GUI Framework
+PySide6>=6.5.0
+
+# Audio processing
+sounddevice>=0.4.6
+soundfile>=0.12.1
+numpy>=1.24.0
+scipy>=1.10.0
+
+# File handling
+psutil>=5.9.0
+
+# Optional: Future pitch shifting (etap 2)
+# pyrubberband>=0.3.0

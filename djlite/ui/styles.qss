@@ -1,0 +1,331 @@
+/* DJ Lite - Minimalny styl dla przezroczystego interfejsu */
+
+/* Główne okno */
+QMainWindow {
+    background: rgba(20, 20, 20, 180);
+    border: 1px solid rgba(100, 100, 100, 150);
+    border-radius: 8px;
+}
+
+/* Ogólne ustawienia dla wszystkich widgetów */
+QWidget {
+    color: #ffffff;
+    font-family: "Arial", sans-serif;
+    font-size: 9pt;
+}
+
+/* Etykiety */
+QLabel {
+    color: #ffffff;
+    background: transparent;
+    padding: 2px;
+}
+
+/* Przyciski */
+QPushButton {
+    background: rgba(60, 60, 60, 180);
+    border: 1px solid rgba(120, 120, 120, 150);
+    border-radius: 4px;
+    padding: 6px 12px;
+    color: #ffffff;
+    font-weight: bold;
+    min-height: 20px;
+}
+
+QPushButton:hover {
+    background: rgba(80, 80, 80, 200);
+    border: 1px solid rgba(140, 140, 140, 180);
+}
+
+QPushButton:pressed {
+    background: rgba(40, 40, 40, 220);
+    border: 1px solid rgba(100, 100, 100, 200);
+}
+
+QPushButton:checked {
+    background: rgba(0, 120, 215, 180);
+    border: 1px solid rgba(0, 140, 235, 200);
+}
+
+/* Przyciski Play/Pause */
+QPushButton#playButton {
+    background: rgba(0, 150, 0, 180);
+    font-size: 12pt;
+    min-width: 60px;
+    min-height: 30px;
+}
+
+QPushButton#playButton:hover {
+    background: rgba(0, 180, 0, 200);
+}
+
+QPushButton#playButton:checked {
+    background: rgba(200, 100, 0, 180);
+}
+
+QPushButton#playButton:checked:hover {
+    background: rgba(220, 120, 0, 200);
+}
+
+/* Suwaki */
+QSlider {
+    background: transparent;
+}
+
+QSlider::groove:horizontal {
+    background: rgba(80, 80, 80, 150);
+    height: 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(60, 60, 60, 100);
+}
+
+QSlider::handle:horizontal {
+    background: rgba(200, 200, 200, 200);
+    border: 1px solid rgba(150, 150, 150, 150);
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    margin: -6px 0;
+}
+
+QSlider::handle:horizontal:hover {
+    background: rgba(220, 220, 220, 220);
+    border: 1px solid rgba(180, 180, 180, 180);
+}
+
+QSlider::handle:horizontal:pressed {
+    background: rgba(180, 180, 180, 220);
+}
+
+/* Suwak crossfader */
+QSlider#crossfader::groove:horizontal {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                               stop:0 rgba(200, 0, 0, 150),
+                               stop:0.5 rgba(100, 100, 100, 150),
+                               stop:1 rgba(0, 0, 200, 150));
+    height: 8px;
+    border-radius: 4px;
+}
+
+QSlider#crossfader::handle:horizontal {
+    background: rgba(255, 255, 255, 220);
+    border: 2px solid rgba(200, 200, 200, 200);
+    width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    margin: -8px 0;
+}
+
+/* Suwaki pionowe */
+QSlider::groove:vertical {
+    background: rgba(80, 80, 80, 150);
+    width: 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(60, 60, 60, 100);
+}
+
+QSlider::handle:vertical {
+    background: rgba(200, 200, 200, 200);
+    border: 1px solid rgba(150, 150, 150, 150);
+    width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    margin: 0 -6px;
+}
+
+QSlider::handle:vertical:hover {
+    background: rgba(220, 220, 220, 220);
+}
+
+/* Pokrętła (QDial) */
+QDial {
+    background: rgba(60, 60, 60, 150);
+    border: 2px solid rgba(100, 100, 100, 150);
+    border-radius: 25px;
+    min-width: 50px;
+    min-height: 50px;
+}
+
+/* Pola tekstowe */
+QLineEdit {
+    background: rgba(40, 40, 40, 180);
+    border: 1px solid rgba(100, 100, 100, 150);
+    border-radius: 3px;
+    padding: 4px;
+    color: #ffffff;
+    selection-background-color: rgba(0, 120, 215, 150);
+}
+
+QLineEdit:focus {
+    border: 1px solid rgba(0, 120, 215, 200);
+}
+
+/* Lista utworów */
+QListWidget {
+    background: rgba(30, 30, 30, 180);
+    border: 1px solid rgba(100, 100, 100, 150);
+    border-radius: 4px;
+    alternate-background-color: rgba(40, 40, 40, 100);
+    selection-background-color: rgba(0, 120, 215, 150);
+    outline: none;
+}
+
+QListWidget::item {
+    padding: 4px;
+    border-bottom: 1px solid rgba(60, 60, 60, 100);
+}
+
+QListWidget::item:hover {
+    background: rgba(60, 60, 60, 120);
+}
+
+QListWidget::item:selected {
+    background: rgba(0, 120, 215, 180);
+    color: #ffffff;
+}
+
+/* Paski postępu */
+QProgressBar {
+    background: rgba(40, 40, 40, 150);
+    border: 1px solid rgba(80, 80, 80, 150);
+    border-radius: 3px;
+    text-align: center;
+    color: #ffffff;
+    font-size: 8pt;
+}
+
+QProgressBar::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                               stop:0 rgba(0, 200, 0, 180),
+                               stop:0.7 rgba(200, 200, 0, 180),
+                               stop:1 rgba(200, 0, 0, 180));
+    border-radius: 2px;
+}
+
+/* VU Meter */
+QProgressBar#vuMeter {
+    background: rgba(20, 20, 20, 180);
+    border: 1px solid rgba(60, 60, 60, 150);
+    border-radius: 2px;
+    text-align: center;
+}
+
+QProgressBar#vuMeter::chunk {
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                               stop:0 rgba(200, 0, 0, 200),
+                               stop:0.3 rgba(200, 200, 0, 180),
+                               stop:1 rgba(0, 200, 0, 160));
+    border-radius: 1px;
+}
+
+/* Grupy widgetów */
+QGroupBox {
+    background: rgba(40, 40, 40, 120);
+    border: 1px solid rgba(80, 80, 80, 150);
+    border-radius: 6px;
+    margin-top: 10px;
+    padding-top: 5px;
+    font-weight: bold;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 2px 8px;
+    background: rgba(60, 60, 60, 180);
+    border: 1px solid rgba(100, 100, 100, 150);
+    border-radius: 3px;
+    color: #ffffff;
+}
+
+/* Separatory */
+QFrame[frameShape="4"] { /* HLine */
+    background: rgba(100, 100, 100, 150);
+    max-height: 1px;
+}
+
+QFrame[frameShape="5"] { /* VLine */
+    background: rgba(100, 100, 100, 150);
+    max-width: 1px;
+}
+
+/* Scrollbary */
+QScrollBar:vertical {
+    background: rgba(40, 40, 40, 150);
+    width: 12px;
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(100, 100, 100, 180);
+    border-radius: 6px;
+    min-height: 20px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(120, 120, 120, 200);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* Tooltips */
+QToolTip {
+    background: rgba(60, 60, 60, 220);
+    border: 1px solid rgba(120, 120, 120, 180);
+    border-radius: 4px;
+    padding: 4px;
+    color: #ffffff;
+    font-size: 8pt;
+}
+
+/* Specjalne style dla deck widgets */
+.deck-widget {
+    background: rgba(30, 30, 30, 160);
+    border: 1px solid rgba(80, 80, 80, 150);
+    border-radius: 8px;
+    margin: 4px;
+    padding: 8px;
+}
+
+/* Style dla mixer widget */
+.mixer-widget {
+    background: rgba(25, 25, 25, 160);
+    border: 1px solid rgba(70, 70, 70, 150);
+    border-radius: 8px;
+    margin: 4px;
+    padding: 8px;
+}
+
+/* Style dla playlist widget */
+.playlist-widget {
+    background: rgba(35, 35, 35, 160);
+    border: 1px solid rgba(90, 90, 90, 150);
+    border-radius: 8px;
+    margin: 4px;
+    padding: 8px;
+}
+
+/* Przycisk zamknięcia */
+QPushButton#closeButton {
+    background: rgba(200, 50, 50, 180);
+    border: 1px solid rgba(220, 70, 70, 200);
+    border-radius: 12px;
+    font-weight: bold;
+    font-size: 10pt;
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+}
+
+QPushButton#closeButton:hover {
+    background: rgba(220, 70, 70, 220);
+    border: 1px solid rgba(240, 90, 90, 240);
+}
+
+QPushButton#closeButton:pressed {
+    background: rgba(180, 30, 30, 240);
+}
