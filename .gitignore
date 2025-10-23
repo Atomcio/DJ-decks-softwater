@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtualenv
+venv/
+.env/
+
+# OS/IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs and runtime
+logs/
+*.log
+
+# Tests/Artifacts
+.coverage
+pytest_cache/
+
+# Audio/large artifacts (optional, adjust as needed)
+*.wav
+*.aiff
+*.flac
+*.mp3
+
+# Build/Dist
+build/
+dist/
+
+# Rubber Band or external binaries
+rubberband*/
+
+# Local cache
+**/__pycache__/
+**/.pytest_cache/

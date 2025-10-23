@@ -1,6 +1,7 @@
 """Wybór folderu i indeksowanie utworów audio dla DJ Lite."""
 
 import os
+import json
 import threading
 from pathlib import Path
 from typing import List, Dict, Optional, Callable
@@ -23,6 +24,10 @@ class TrackInfo:
         self._sample_rate: Optional[int] = None
         self._channels: Optional[int] = None
         self._loaded = False
+        
+        # BPM z cache
+        self._bpm: Optional[float] = None
+        self._bpm_loaded = False
     
     def load_audio_info(self) -> bool:
         """Ładuje informacje o pliku audio."""
@@ -55,11 +60,33 @@ class TrackInfo:
         return self._sample_rate or 44100
     
     @property
-    def channels(self) -> int:
-        """Liczba kanałów."""
+    def channels(self) -> Optional[int]:
+        """Liczba kanałów audio."""
         if not self._loaded:
             self.load_audio_info()
-        return self._channels or 2
+        return self._channels
+    
+    @property
+    def bpm(self) -> Optional[float]:
+        """BPM utworu z cache."""
+        if not self._bpm_loaded:
+            self.load_bpm_info()
+        return self._bpm
+    
+    def load_bpm_info(self) -> bool:
+        """Ładuje BPM z pliku cache."""
+        try:
+            bpm_cache_path = self.file_path + '.bpm.json'
+            if os.path.exists(bpm_cache_path):
+                with open(bpm_cache_path, 'r') as f:
+                    data = json.load(f)
+                    self._bpm = data.get('bpm')
+            self._bpm_loaded = True
+            return self._bpm is not None
+        except Exception as e:
+            print(f"Błąd ładowania BPM dla {self.file_path}: {e}")
+            self._bpm_loaded = True
+            return False
     
     def format_duration(self) -> str:
         """Formatuje długość jako MM:SS."""

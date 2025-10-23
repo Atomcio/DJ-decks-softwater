@@ -8,7 +8,17 @@ Uruchamia GUI i inicjalizuje system audio.
 import sys
 import os
 import traceback
+import logging
 from pathlib import Path
+
+# Konfiguracja loggingu
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
 
 # Dodaj ścieżkę do modułów
 app_dir = Path(__file__).parent

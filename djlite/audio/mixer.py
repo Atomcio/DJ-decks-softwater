@@ -6,25 +6,27 @@ import numpy as np
 import sounddevice as sd
 from typing import Optional, List
 from .deck import Deck
-from .eq import SimpleEQ
+from .master_clock import get_master_clock
+# EQ import removed
 
 
 class DJMixer:
     """Główny mixer DJ z dwoma deckami i crossfaderem."""
     
-    def __init__(self, sample_rate: int = 48000, buffer_size: int = 2048):
+    def __init__(self, sample_rate: int = 48000, buffer_size: int = 4096):
         # Konfiguracja audio - zoptymalizowana dla stabilności
         self.sample_rate = sample_rate
         self.buffer_size = buffer_size
-        self.latency = 0.08  # 80ms latencji
+        self.latency = 0.12  # 120ms latencji dla lepszej stabilności
+        
+        # Master clock - pojedyncze źródło prawdy dla czasu
+        self.master_clock = get_master_clock(sample_rate)
         
         # Dwa decki
         self.deck_a = Deck(deck_id=1)
         self.deck_b = Deck(deck_id=2)
         
-        # EQ dla każdego decka
-        self.eq_a = SimpleEQ(sample_rate)
-        self.eq_b = SimpleEQ(sample_rate)
+        # EQ removed
         
         # Kontrolki miksera
         self.crossfader = 0.0  # -1.0 (deck A) do +1.0 (deck B)
@@ -59,6 +61,10 @@ class DJMixer:
             if self.audio_stream is not None:
                 self.stop_audio()
             
+            # Uruchom master clock z kompensacją latency
+            latency_ms = self.latency * 1000.0
+            self.master_clock.start(latency_ms)
+            
             # Pre-roll - przygotuj decki przed startem
             self.deck_a.prepare_for_streaming()
             self.deck_b.prepare_for_streaming()
@@ -75,6 +81,7 @@ class DJMixer:
             self.audio_stream.start()
             self.is_streaming = True
             print(f"Audio stream started: {self.sample_rate}Hz, buffer: {self.buffer_size}, latencja: {self.latency}s")
+            print(f"MasterClock started with {latency_ms}ms compensation")
             return True
             
         except Exception as e:
@@ -88,12 +95,25 @@ class DJMixer:
             self.audio_stream.close()
             self.audio_stream = None
         
+        # Zatrzymaj master clock
+        self.master_clock.stop()
+        
         self.is_streaming = False
         print("Audio stream zatrzymany")
+        print("MasterClock stopped")
     
     def _audio_callback(self, outdata: np.ndarray, frames: int, time, status):
-        """Callback audio - TYLKO miksowanie gotowych próbek."""
-        # BRAK printów w callbacku dla wydajności!
+        """Callback audio - TYLKO miksowanie gotowych próbek.
+        
+        KRYTYCZNE: Aktualizuje MasterClock - pojedyncze źródło prawdy dla czasu.
+        """
+        # Loguj status jeśli są problemy
+        if status:
+            print(f"AUDIO status: {status}")  # output_underflow?
+        
+        # PIERWSZA RZECZ: Aktualizuj MasterClock
+        # To musi być na początku, żeby wszystkie decki miały aktualny czas referencyjny
+        self.master_clock.on_audio_callback(frames)
         
         with self._audio_lock:
             try:
@@ -101,9 +121,12 @@ class DJMixer:
                 audio_a = self.deck_a.pop_audio_chunk(frames)
                 audio_b = self.deck_b.pop_audio_chunk(frames)
                 
-                # Zastosuj tylko gain (EQ usunięte z callbacku)
-                audio_a *= self.gain_a
-                audio_b *= self.gain_b
+                # Zastosuj gain (EQ removed)
+                if len(audio_a) > 0:
+                    audio_a *= self.gain_a
+                
+                if len(audio_b) > 0:
+                    audio_b *= self.gain_b
                 
                 # Bardzo uproszczone miksowanie z crossfaderem
                 crossfader_pos = (self.crossfader + 1.0) * 0.5  # -1..1 -> 0..1
@@ -125,13 +148,19 @@ class DJMixer:
                     outdata[:len(mixed_audio)] = mixed_audio
                     outdata[len(mixed_audio):] = 0
                 
-                # Atomowa aktualizacja peak levels (bez VU meters)
+                # Aktualizacja peak levels dla VU meters
+                self._update_peak_levels(audio_a, audio_b)
+                self.update_vu_meters(mixed_audio)
+                
+                # Atomowa aktualizacja peak levels (backup)
                 self._last_peak_a = np.max(np.abs(audio_a)) if len(audio_a) > 0 else 0.0
                 self._last_peak_b = np.max(np.abs(audio_b)) if len(audio_b) > 0 else 0.0
                 
             except Exception:
                 # Cisza zamiast błędu
                 outdata.fill(0)
+        
+        # CPU time measurement removed
     
     def _apply_crossfader(self, audio_a: np.ndarray, audio_b: np.ndarray) -> np.ndarray:
         """Stosuje crossfader do miksowania dwóch decków."""
@@ -179,10 +208,15 @@ class DJMixer:
     def update_vu_meters(self, mixed_audio: np.ndarray):
         """Aktualizuje VU metry na podstawie audio."""
         if len(mixed_audio) > 0:
-            peak = np.max(np.abs(mixed_audio))
-            self.peak_levels['master'] = peak
-            self.peak_levels['A'] = self._last_peak_a
-            self.peak_levels['B'] = self._last_peak_b
+            # Master levels dla stereo
+            if mixed_audio.ndim == 2 and mixed_audio.shape[1] == 2:
+                self.peak_levels['master_l'] = float(np.max(np.abs(mixed_audio[:, 0])))
+                self.peak_levels['master_r'] = float(np.max(np.abs(mixed_audio[:, 1])))
+            else:
+                # Mono lub inne
+                peak = float(np.max(np.abs(mixed_audio)))
+                self.peak_levels['master_l'] = peak
+                self.peak_levels['master_r'] = peak
     
     # Kontrolki crossfadera
     def set_crossfader(self, value: float):
@@ -206,18 +240,7 @@ class DJMixer:
         elif deck.lower() == 'b':
             self.gain_b = gain
     
-    # Kontrolki EQ
-    def set_eq(self, deck: str, band: str, value: float):
-        """Ustawia EQ dla decka i pasma."""
-        eq = self.eq_a if deck.lower() == 'a' else self.eq_b
-        value = max(-1.0, min(1.0, value))
-        
-        if band.lower() == 'low':
-            eq.set_low(value)
-        elif band.lower() == 'mid':
-            eq.set_mid(value)
-        elif band.lower() == 'high':
-            eq.set_high(value)
+    # EQ methods removed
     
     # Kontrolki cue (słuchawki)
     def set_cue(self, deck: str, enabled: bool):
@@ -275,9 +298,7 @@ class DJMixer:
         self.cue_b = False
         self.cue_mix = 0.0
         
-        # Reset EQ
-        self.eq_a.reset()
-        self.eq_b.reset()
+        # EQ reset removed
         
         print("Mixer zresetowany do ustawień domyślnych")
     

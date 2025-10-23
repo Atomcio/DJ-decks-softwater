@@ -9,9 +9,11 @@ sounddevice>=0.4.6
 soundfile>=0.12.1
 numpy>=1.24.0
 scipy>=1.10.0
+librosa>=0.10.0
+aubio>=0.4.9
 
 # File handling
 psutil>=5.9.0
 
 # Optional: Future pitch shifting (etap 2)
-# pyrubberband>=0.3.0
+pyrubberband>=0.3.0
